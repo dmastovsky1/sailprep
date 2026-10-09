@@ -2,7 +2,7 @@ from datetime import date, datetime
 
 import pytest
 
-from sailprep.forecast import build_forecast_url, geocode, get_hourly
+from sailprep.forecast import build_forecast_url, geocode, get_hourly, search_places
 from sailprep.models import Venue
 
 
@@ -30,3 +30,25 @@ def test_get_hourly_parses_payload(fake_fetch):
     assert len(hours) == 24
     assert hours[12].time == datetime(2026, 7, 18, 12)
     assert hours[12].wind_speed_kt == 12
+
+
+def test_search_places_returns_all_matches():
+    payload = {
+        "results": [
+            {
+                "name": "Newport",
+                "admin1": "Rhode Island",
+                "country": "United States",
+                "latitude": 41.49,
+                "longitude": -71.31,
+                "timezone": "America/New_York",
+            },
+            {"name": "Newport", "country": "United Kingdom", "latitude": 51.58, "longitude": -3.0},
+        ]
+    }
+    venues = search_places("Newport", fetch=lambda url: payload)
+    assert [v.name for v in venues] == [
+        "Newport, Rhode Island, United States",
+        "Newport, United Kingdom",
+    ]
+    assert venues[1].timezone == "auto"

@@ -26,6 +26,11 @@ uvicorn sailprep_api.main:app --reload
 | --- | --- |
 | `GET /health` | The process is up (no database call) |
 | `GET /health/ready` | PostgreSQL is reachable; 503 if not |
+| `GET /api/v1/boat-classes` | Built-in boat class profiles |
+| `GET /api/v1/venues/search?q=newport` | Places matching a name, best first |
+| `GET /api/v1/brief?venue=Newport&boat=j70&date=2026-07-18&start=11:00&end=16:00` | Race brief: conditions, timed heads-ups and the day's hourly forecast (add `lat` and `lon` to skip the place lookup) |
+
+Briefs are built live from Open-Meteo for now and are stateless, so the query string doubles as a share link. Stored briefs, forecast history and multiple models arrive with the database work.
 
 ## Checks
 
