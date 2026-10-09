@@ -14,7 +14,7 @@ Built first for inshore racing in dinghies, foilers and keelboats, with offshore
 
 ```
 packages/core/   Python package: forecast fetching, analysis, heads-ups, brief rendering (working today)
-apps/api/        FastAPI backend and scheduled worker (Phase 1)
+apps/api/        FastAPI backend (Phase 1, in progress) and scheduled worker
 apps/web/        Next.js web app (Phase 2)
 apps/mobile/     React Native app (Phase 5)
 docs/            Architecture and design notes
@@ -32,6 +32,14 @@ sailprep brief --venue "Newport" --boat j70 --date 2026-07-18 --start 11:00 --en
 ```
 
 Sample output: [`packages/core/examples/newport-j70.md`](packages/core/examples/newport-j70.md).
+
+## Run the API
+
+```bash
+docker compose up --build
+```
+
+Then open http://localhost:8000/docs. See [apps/api/README.md](apps/api/README.md).
 
 ## Architecture
 
