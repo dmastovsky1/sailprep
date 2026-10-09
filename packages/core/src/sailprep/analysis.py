@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -104,7 +105,9 @@ def clock(t: datetime) -> str:
     return f"{t.hour % 12 or 12} {'am' if t.hour < 12 else 'pm'}"
 
 
-def first(hrs: list[HourlyForecast], test) -> HourlyForecast | None:
+def first(
+    hrs: list[HourlyForecast], test: Callable[[HourlyForecast], bool]
+) -> HourlyForecast | None:
     return next((h for h in hrs if test(h)), None)
 
 

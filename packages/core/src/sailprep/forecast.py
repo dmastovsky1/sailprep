@@ -10,6 +10,7 @@ import urllib.parse
 import urllib.request
 from collections.abc import Callable
 from datetime import date, datetime
+from typing import Any
 
 from .models import HourlyForecast, Venue
 
@@ -25,13 +26,15 @@ HOURLY_VARS = [
 ]
 
 # Injected in tests so nothing touches the network.
-Fetcher = Callable[[str], dict]
+JSON = dict[str, Any]
+Fetcher = Callable[[str], JSON]
 
 
-def http_get_json(url: str) -> dict:
+def http_get_json(url: str) -> JSON:
     req = urllib.request.Request(url, headers={"User-Agent": "sailprep/0.1"})
     with urllib.request.urlopen(req, timeout=20) as resp:
-        return json.load(resp)
+        data: JSON = json.load(resp)
+        return data
 
 
 def geocode(name: str, fetch: Fetcher = http_get_json) -> Venue:
@@ -58,7 +61,7 @@ def build_forecast_url(venue: Venue, day: date) -> str:
     return f"{FORECAST_URL}?{urllib.parse.urlencode(params)}"
 
 
-def parse_hourly(payload: dict) -> list[HourlyForecast]:
+def parse_hourly(payload: JSON) -> list[HourlyForecast]:
     h = payload["hourly"]
     return [
         HourlyForecast(

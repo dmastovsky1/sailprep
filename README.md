@@ -1,60 +1,50 @@
-# sailprep
+# Sailprep
 
-Race-day prep for sailors. Tell it where you're racing and what you sail, and it builds a race brief: forecast for the race window, conditions summary, and time-stamped heads-ups for your boat.
+[![CI](https://github.com/dmastovsky1/sailprep/actions/workflows/ci.yml/badge.svg)](https://github.com/dmastovsky1/sailprep/actions/workflows/ci.yml)
 
-Built for inshore racing across dinghies, foilers and keelboats, with offshore support on the roadmap.
+A sailing forecaster for racers. Pick a venue, a boat and a race window, and Sailprep builds a race-day weather brief: wind, gusts and direction across several forecast models, tides, local conditions notes, and gentle time-stamped heads-ups such as *"At 2 pm the breeze is forecast at 20+ kt, so you might want to start thinking about depowering."* Briefs can be shared as a PDF straight into a crew group chat.
 
-## Quick start
+After sailing, you can log what you actually saw. Sailprep compares those logs (plus nearby buoys and weather stations) with what was forecast, and learns a correction for venues you sail often.
+
+Sailprep is a forecaster, not a coach: it describes the weather and never gives tactical advice.
+
+Built first for inshore racing in dinghies, foilers and keelboats, with offshore and native mobile on the roadmap.
+
+## Repository layout
+
+```
+packages/core/   Python package: forecast fetching, analysis, heads-ups, brief rendering (working today)
+apps/api/        FastAPI backend and scheduled worker (Phase 1)
+apps/web/        Next.js web app (Phase 2)
+apps/mobile/     React Native app (Phase 5)
+docs/            Architecture and design notes
+```
+
+## Try it today
+
+The core package already works as a command-line tool:
 
 ```bash
+cd packages/core
 pip install -e ".[dev]"
-
-# List built-in boat classes
 sailprep boats
-
-# Brief for a J/70 regatta in Newport, venue looked up by name
 sailprep brief --venue "Newport" --boat j70 --date 2026-07-18 --start 11:00 --end 16:00
-
-# Use exact coordinates and save to a file
-sailprep brief --venue "Narragansett Bay" --lat 41.49 --lon -71.33 --boat waszp -o brief.md
 ```
 
-See [`examples/newport-j70.md`](examples/newport-j70.md) for sample output (generated from test fixture data).
+Sample output: [`packages/core/examples/newport-j70.md`](packages/core/examples/newport-j70.md).
 
-## What's in a brief
+## Architecture
 
-- **Conditions at a glance:** wind range and mean, max gust and gust factor, mean direction and spread, temperature, rain.
-- **Heads-ups:** gentle, time-stamped notes when the forecast crosses a threshold for your boat, such as "At 2 pm the breeze is forecast at 20+ kt, so you might want to start thinking about depowering." sailprep is a forecaster, not a coach: it never gives tactical advice.
-- **Hour by hour** table for the race window.
-
-## How it works
-
-```
-src/sailprep/
-  models.py    Venue, Boat, HourlyForecast, RaceDay
-  boats.py     Built-in boat class profiles (wind ranges, crew, foiling threshold)
-  forecast.py  Open-Meteo geocoding and hourly forecast client (stdlib only)
-  analysis.py  Race-window summary and timed heads-ups
-  brief.py     Markdown renderer
-  cli.py       `sailprep` command
-```
-
-Forecast data comes from [Open-Meteo](https://open-meteo.com), which is free and needs no API key. The network call is injected, so the test suite runs entirely offline against fixtures.
+See [docs/architecture.md](docs/architecture.md) for the system design and [ROADMAP.md](ROADMAP.md) for the build plan.
 
 ## Development
 
-```bash
-pip install -e ".[dev]"
-ruff check . && ruff format --check .
-pytest
-```
-
-CI runs lint and tests on Python 3.11 to 3.13 for every push and pull request.
-
-## Roadmap
-
-See [ROADMAP.md](ROADMAP.md).
+Every pull request runs lint (ruff), strict type checks (mypy) and tests (pytest, Python 3.11 to 3.13) in GitHub Actions. Jobs only run for the parts of the repo a change touches.
 
 ## Disclaimer
 
-sailprep is a planning aid. Always check official marine forecasts and follow race committee instructions.
+Sailprep is a planning aid. Always check official marine forecasts and follow race committee instructions.
+
+## License
+
+MIT
