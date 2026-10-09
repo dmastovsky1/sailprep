@@ -20,6 +20,7 @@ Open http://localhost:3000. Or run the whole stack with `docker compose up --bui
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `/`                                                      | Venue search, boat, race day and window                                                                                              |
 | `/brief?venue=…&boat=…&date=…&start=…&end=…&lat=…&lon=…` | The brief: conditions at a glance, timed heads-ups, wind chart with the race window shaded, hour by hour. The URL is the share link. |
+| `/brief/pdf?…` (same query) | The brief as a one-page PDF (flows to a second page if needed), for **Share PDF** and **Download** |
 
 ## Checks
 

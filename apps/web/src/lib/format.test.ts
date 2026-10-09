@@ -42,3 +42,16 @@ describe("time labels", () => {
     expect(longDate("2026-07-18")).toBe("Saturday 18 July 2026");
   });
 });
+
+describe("pdfFilename", async () => {
+  const { pdfFilename } = await import("./pdf/filename");
+  it("slugs the first part of the venue name", () => {
+    const brief = { venue: { name: "Newport, Rhode Island, United States" }, date: "2026-07-18" };
+    expect(pdfFilename(brief as never)).toBe("sailprep-newport-2026-07-18.pdf");
+  });
+  it("falls back when the name has no usable characters", () => {
+    expect(pdfFilename({ venue: { name: "???" }, date: "2026-07-18" } as never)).toBe(
+      "sailprep-brief-2026-07-18.pdf",
+    );
+  });
+});

@@ -50,7 +50,7 @@ Heads-ups come from a rules table (trigger, per-class threshold, wording templat
 | Jobs | Worker on a Postgres-backed queue |
 | Web | Next.js, TypeScript, Tailwind, MapLibre, Recharts |
 | Mobile (later) | React Native with Expo |
-| PDF | Server-side render of the brief page with headless Chromium |
+| PDF | Rendered on the web server with react-pdf (no headless browser), a few KB per brief |
 | CI/CD | GitHub Actions; preview deploys per PR, production on merge |
 
 ## Data model
@@ -83,4 +83,4 @@ Each observation is compared with the forecast issued for that hour and place. E
 
 - Local knowledge notes are private by default, with a per-note switch to share them with sailors at that venue, named or anonymous.
 - Every brief has **Download PDF** and **Share**; Share uses the phone's share sheet so the PDF drops straight into a group chat. A short link opens the live brief.
-- The PDF is two pages (at a glance, then detail), stamped with the forecast issue time, under 1 MB.
+- The PDF leads with the at-a-glance view, heads-ups and wind chart, then hour by hour; it is stamped with the forecast fetch time and is only a few KB.
