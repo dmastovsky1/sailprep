@@ -28,7 +28,7 @@ def render_markdown(race: RaceDay, c: Conditions) -> str:
         f"| Air temp | {c.temp_min_c:.0f} to {c.temp_max_c:.0f} C |",
         f"| Rain | {c.precipitation_mm:.1f} mm |",
         "",
-        "## Key notes",
+        "## Heads-ups",
         "",
     ]
     lines += [f"- {n}" for n in c.notes] or ["- Nothing unusual in the forecast."]

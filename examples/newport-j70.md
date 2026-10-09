@@ -16,10 +16,10 @@
 | Air temp | 26 to 28 C |
 | Rain | 0.0 mm |
 
-## Key notes
+## Heads-ups
 
-- Gusty (gust factor 1.5): keep heads out of the boat and play the pressure.
-- Breeze building by ~4 kt through the day.
+- Gusts are forecast up to 1.5 times the mean wind, so expect a puffy day.
+- The breeze is forecast to build from 11 kt at 11 am to 15 kt by 4 pm.
 
 ## Hour by hour
 

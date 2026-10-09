@@ -1,9 +1,10 @@
-"""Turn hourly forecast data into race-relevant conditions and boat-specific notes."""
+"""Turn hourly forecast data into race-relevant conditions and timed heads-ups."""
 
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from datetime import datetime
 
 from .models import Boat, BoatType, HourlyForecast, RaceDay
 
@@ -94,56 +95,92 @@ def summarize(race: RaceDay) -> Conditions:
         temp_min_c=min(h.temperature_c for h in hrs),
         temp_max_c=max(h.temperature_c for h in hrs),
     )
-    c.notes = boat_notes(race.boat, c)
+    c.notes = heads_ups(race.boat, hrs, c)
     return c
 
 
-def boat_notes(boat: Boat, c: Conditions) -> list[str]:
+def clock(t: datetime) -> str:
+    """Format an hour the way sailors say it: '2 pm', '11 am'."""
+    return f"{t.hour % 12 or 12} {'am' if t.hour < 12 else 'pm'}"
+
+
+def first(hrs: list[HourlyForecast], test) -> HourlyForecast | None:
+    return next((h for h in hrs if test(h)), None)
+
+
+def heads_ups(boat: Boat, hrs: list[HourlyForecast], c: Conditions) -> list[str]:
+    """Time-stamped, gently worded heads-ups about the forecast.
+
+    Sailprep is a forecaster, not a coach: these describe what the weather is
+    expected to do and when, and only ever suggest preparation (rig, gear,
+    clothing). They never give tactical or boat-handling advice.
+    """
     notes: list[str] = []
+
     if c.wind_max_kt < boat.min_wind_kt:
         notes.append(
-            f"Wind may stay below {boat.min_wind_kt:g} kt: expect postponement or abandoned races."
+            f"Under {boat.min_wind_kt:g} kt is forecast for the whole window, "
+            "so a postponement is possible."
         )
-    elif c.wind_min_kt < boat.min_wind_kt:
-        notes.append("Light patches below racing minimum possible; watch for postponements.")
-    if c.gust_max_kt > boat.max_wind_kt:
+    elif light := first(hrs, lambda h: h.wind_speed_kt < boat.min_wind_kt):
         notes.append(
-            f"Gusts to {c.gust_max_kt:.0f} kt exceed the {boat.max_wind_kt:g} kt "
-            "upper limit: racing may be cancelled."
+            f"Around {clock(light.time)} the breeze is forecast to drop to "
+            f"{light.wind_speed_kt:.0f} kt, under the usual racing minimum, "
+            "so there could be a delay."
         )
-    elif c.wind_max_kt >= boat.heavy_air_kt or c.gust_max_kt >= boat.heavy_air_kt + 5:
-        notes.append("Heavy air expected: rig for depower, check gear and safety kit.")
+
+    if over := first(hrs, lambda h: h.wind_gust_kt > boat.max_wind_kt):
+        notes.append(
+            f"From {clock(over.time)} gusts near {over.wind_gust_kt:.0f} kt are forecast, "
+            f"above the {boat.name}'s usual {boat.max_wind_kt:g} kt racing limit, "
+            "so racing could be cut short."
+        )
+    elif heavy := first(hrs, lambda h: h.wind_speed_kt >= boat.heavy_air_kt):
+        notes.append(
+            f"At {clock(heavy.time)} the breeze is forecast at {heavy.wind_speed_kt:.0f}+ kt "
+            f"(gusts {heavy.wind_gust_kt:.0f}), so you might want to start thinking "
+            "about depowering."
+        )
+
     if boat.type is BoatType.FOILER and boat.foiling_kt is not None:
-        if c.wind_mean_kt < boat.foiling_kt:
+        marginal = [h for h in hrs if h.wind_speed_kt < boat.foiling_kt]
+        if marginal:
+            lo = min(h.wind_speed_kt for h in marginal)
+            hi = max(h.wind_speed_kt for h in marginal)
+            span = f"{lo:.0f} kt" if round(lo) == round(hi) else f"{lo:.0f} to {hi:.0f} kt"
             notes.append(
-                f"Mean wind under ~{boat.foiling_kt:g} kt: marginal foiling, "
-                "prioritise early take-off and light-air foil setup."
+                f"From {clock(marginal[0].time)} to {clock(marginal[-1].time)} the forecast is "
+                f"{span}, which is marginal for foiling a {boat.name}. "
+                "Worth thinking about your light-air setup."
             )
-        else:
-            notes.append("Foiling conditions likely for most of the window.")
-    if boat.type is BoatType.DINGHY and c.wind_mean_kt >= 15:
-        notes.append("Sustained hiking breeze: hydrate and plan for physical endurance.")
-    if boat.type is BoatType.KEELBOAT and c.wind_max_kt >= boat.heavy_air_kt:
-        notes.append("Check crew weight and headsail choice for the top of the range.")
+
+    if abs(c.direction_trend_deg) >= 15:
+        side = "right" if c.direction_trend_deg > 0 else "left"
+        notes.append(
+            f"The wind is forecast to swing about {abs(c.direction_trend_deg):.0f} degrees "
+            f"to the {side} between {clock(hrs[0].time)} and {clock(hrs[-1].time)}."
+        )
+    elif c.direction_spread_deg >= 20:
+        notes.append(
+            f"The forecast direction varies by about {c.direction_spread_deg:.0f} degrees "
+            "across the window."
+        )
+
     if c.gust_factor >= 1.4:
         notes.append(
-            f"Gusty (gust factor {c.gust_factor:.1f}): keep heads out of the boat "
-            "and play the pressure."
+            f"Gusts are forecast up to {c.gust_factor:.1f} times the mean wind, "
+            "so expect a puffy day."
         )
-    if c.direction_spread_deg >= 20:
-        notes.append(
-            f"Shifty: direction varies ~{c.direction_spread_deg:.0f} deg over the "
-            "window. Track shifts on a compass before the start."
-        )
-    if abs(c.direction_trend_deg) >= 15:
-        side = "right (veering)" if c.direction_trend_deg > 0 else "left (backing)"
-        notes.append(
-            f"Persistent shift to the {side} of ~{abs(c.direction_trend_deg):.0f} "
-            "deg forecast: favour that side on longer beats."
-        )
+
     if abs(c.wind_trend_kt) >= 4:
-        word = "building" if c.wind_trend_kt > 0 else "dropping"
-        notes.append(f"Breeze {word} by ~{abs(c.wind_trend_kt):.0f} kt through the day.")
-    if c.precipitation_mm >= 1:
-        notes.append("Rain forecast: pack wet-weather gear and expect patchy, unstable breeze.")
+        word = "build" if c.wind_trend_kt > 0 else "ease"
+        notes.append(
+            f"The breeze is forecast to {word} from {hrs[0].wind_speed_kt:.0f} kt at "
+            f"{clock(hrs[0].time)} to {hrs[-1].wind_speed_kt:.0f} kt by {clock(hrs[-1].time)}."
+        )
+
+    if rain := first(hrs, lambda h: h.precipitation_mm >= 0.5):
+        notes.append(
+            f"Rain is forecast from {clock(rain.time)}, so you might want to pack wet-weather gear."
+        )
     return notes

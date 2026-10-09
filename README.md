@@ -1,6 +1,6 @@
 # sailprep
 
-Race-day prep for sailors. Tell it where you're racing and what you sail, and it builds a race brief: forecast for the race window, conditions summary, and boat-specific notes.
+Race-day prep for sailors. Tell it where you're racing and what you sail, and it builds a race brief: forecast for the race window, conditions summary, and time-stamped heads-ups for your boat.
 
 Built for inshore racing across dinghies, foilers and keelboats, with offshore support on the roadmap.
 
@@ -24,7 +24,7 @@ See [`examples/newport-j70.md`](examples/newport-j70.md) for sample output (gene
 ## What's in a brief
 
 - **Conditions at a glance:** wind range and mean, max gust and gust factor, mean direction and spread, temperature, rain.
-- **Key notes:** generated from the boat's wind range, for example postponement or cancellation risk, heavy-air depower, marginal foiling, gustiness, shiftiness, persistent shifts, and building or dropping breeze.
+- **Heads-ups:** gentle, time-stamped notes when the forecast crosses a threshold for your boat, such as "At 2 pm the breeze is forecast at 20+ kt, so you might want to start thinking about depowering." sailprep is a forecaster, not a coach: it never gives tactical advice.
 - **Hour by hour** table for the race window.
 
 ## How it works
@@ -34,7 +34,7 @@ src/sailprep/
   models.py    Venue, Boat, HourlyForecast, RaceDay
   boats.py     Built-in boat class profiles (wind ranges, crew, foiling threshold)
   forecast.py  Open-Meteo geocoding and hourly forecast client (stdlib only)
-  analysis.py  Race-window summary and boat-specific notes
+  analysis.py  Race-window summary and timed heads-ups
   brief.py     Markdown renderer
   cli.py       `sailprep` command
 ```
