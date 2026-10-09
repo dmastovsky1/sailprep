@@ -10,6 +10,13 @@ Sailprep is a forecaster, not a coach: it describes the weather and never gives 
 
 Built first for inshore racing in dinghies, foilers and keelboats, with offshore and native mobile on the roadmap.
 
+<p>
+  <img src="docs/screenshots/brief-desktop.png" alt="Race brief for a J/70 at Newport: conditions, heads-ups, wind chart and hour by hour" width="68%">
+  <img src="docs/screenshots/brief-phone.png" alt="The same brief on a phone in dark mode" width="28%">
+</p>
+
+<sub>Screenshots use recorded forecast data.</sub>
+
 ## Repository layout
 
 ```
