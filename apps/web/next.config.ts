@@ -6,6 +6,8 @@ const apiUrl = process.env.SAILPREP_API_URL ?? "http://localhost:8000";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // react-pdf renders on the server; keep it out of the bundler.
+  serverExternalPackages: ["@react-pdf/renderer"],
   async rewrites() {
     return [{ source: "/api/v1/:path*", destination: `${apiUrl}/api/v1/:path*` }];
   },

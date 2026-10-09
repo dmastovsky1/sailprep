@@ -1,6 +1,8 @@
 import { clockLabel, hourLabel, longDate, round } from "@/lib/format";
 import type { Brief } from "@/lib/types";
 
+import { pdfFilename } from "@/lib/pdf/filename";
+
 import { ShareBar } from "./ShareBar";
 import { WindArrow } from "./WindArrow";
 import { WindChart } from "./WindChart";
@@ -46,7 +48,10 @@ export function BriefView({ brief }: { brief: Brief }) {
             {brief.boat.name} · racing {clockLabel(brief.start)} to {clockLabel(brief.end)}
           </p>
         </div>
-        <ShareBar title={`Race brief: ${brief.venue.name}, ${longDate(brief.date)}`} />
+        <ShareBar
+          title={`Race brief: ${brief.venue.name}, ${longDate(brief.date)}`}
+          filename={pdfFilename(brief)}
+        />
       </header>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">

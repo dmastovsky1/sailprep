@@ -23,7 +23,7 @@ Each phase ships as a series of small pull requests with green CI. A phase is do
 - [x] Brief API endpoints (live from Open-Meteo, stateless share links)
 - [x] Plan a race, brief page with wind chart
 - [ ] Model spread and venue map
-- [ ] PDF export and share links (native share sheet for group chats)
+- [x] PDF export and share links (native share sheet for group chats)
 - [ ] Preview deploys on every PR; production deploy on merge
 
 **Gate:** a live URL anyone can use.
