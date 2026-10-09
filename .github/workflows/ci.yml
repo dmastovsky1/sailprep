@@ -15,6 +15,7 @@ jobs:
     outputs:
       core: ${{ steps.filter.outputs.core }}
       api: ${{ steps.filter.outputs.api }}
+      web: ${{ steps.filter.outputs.web }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -28,6 +29,9 @@ jobs:
               - 'apps/api/**'
               - 'packages/core/**'
               - 'docker-compose.yml'
+              - '.github/workflows/ci.yml'
+            web:
+              - 'apps/web/**'
               - '.github/workflows/ci.yml'
 
   core-lint:
@@ -115,10 +119,39 @@ jobs:
           for i in $(seq 1 20); do curl -fs localhost:8000/health && exit 0; sleep 1; done
           docker logs api; exit 1
 
+  web:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run build
+
+  web-image:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f apps/web/Dockerfile -t sailprep-web .
+
   # Single required check for branch protection, so path-skipped jobs don't block merges.
   ci-ok:
     if: always()
-    needs: [core-lint, core-test, api, api-image]
+    needs: [core-lint, core-test, api, api-image, web, web-image]
     runs-on: ubuntu-latest
     steps:
       - run: |

@@ -20,7 +20,9 @@ Each phase ships as a series of small pull requests with green CI. A phase is do
 **Gate:** a brief is served by the API with integration tests passing.
 
 ## Phase 2: Web app v1
-- [ ] Plan a race, brief page with wind chart and model spread, venue map
+- [x] Brief API endpoints (live from Open-Meteo, stateless share links)
+- [x] Plan a race, brief page with wind chart
+- [ ] Model spread and venue map
 - [ ] PDF export and share links (native share sheet for group chats)
 - [ ] Preview deploys on every PR; production deploy on merge
 
