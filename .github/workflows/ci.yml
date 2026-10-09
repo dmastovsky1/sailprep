@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       core: ${{ steps.filter.outputs.core }}
+      api: ${{ steps.filter.outputs.api }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -22,6 +23,11 @@ jobs:
           filters: |
             core:
               - 'packages/core/**'
+              - '.github/workflows/ci.yml'
+            api:
+              - 'apps/api/**'
+              - 'packages/core/**'
+              - 'docker-compose.yml'
               - '.github/workflows/ci.yml'
 
   core-lint:
@@ -61,10 +67,58 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: pytest -v --cov=sailprep --cov-report=term-missing
 
+  api:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sailprep
+          POSTGRES_PASSWORD: sailprep
+          POSTGRES_DB: sailprep
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sailprep"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      SAILPREP_DATABASE_URL: postgresql+psycopg://sailprep:sailprep@localhost:5432/sailprep
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -e ../../packages/core -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: mypy
+      - run: pytest -v --cov=sailprep_api --cov-report=term-missing
+
+  api-image:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f apps/api/Dockerfile -t sailprep-api .
+      - name: Smoke test the image
+        run: |
+          docker run -d --name api -p 8000:8000 sailprep-api
+          for i in $(seq 1 20); do curl -fs localhost:8000/health && exit 0; sleep 1; done
+          docker logs api; exit 1
+
   # Single required check for branch protection, so path-skipped jobs don't block merges.
   ci-ok:
     if: always()
-    needs: [core-lint, core-test]
+    needs: [core-lint, core-test, api, api-image]
     runs-on: ubuntu-latest
     steps:
       - run: |

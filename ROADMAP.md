@@ -11,7 +11,7 @@ Each phase ships as a series of small pull requests with green CI. A phase is do
 **Gate:** CI green on `main`.
 
 ## Phase 1: API and database
-- [ ] FastAPI service, health check, Docker Compose with PostgreSQL
+- [x] FastAPI service, health check, Docker Compose with PostgreSQL
 - [ ] Tables and Alembic migrations for venues, boat classes, forecast runs and points
 - [ ] Worker pulling GFS, ECMWF, ICON and HRRR from Open-Meteo on a schedule
 - [ ] Venue, boat class and forecast endpoints with per-model and consensus values
