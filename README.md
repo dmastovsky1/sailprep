@@ -10,12 +10,19 @@ Sailprep is a forecaster, not a coach: it describes the weather and never gives 
 
 Built first for inshore racing in dinghies, foilers and keelboats, with offshore and native mobile on the roadmap.
 
+<p>
+  <img src="docs/screenshots/brief-desktop.png" alt="Race brief for a J/70 at Newport: conditions, heads-ups, wind chart and hour by hour" width="68%">
+  <img src="docs/screenshots/brief-phone.png" alt="The same brief on a phone in dark mode" width="28%">
+</p>
+
+<sub>Screenshots use recorded forecast data.</sub>
+
 ## Repository layout
 
 ```
 packages/core/   Python package: forecast fetching, analysis, heads-ups, brief rendering (working today)
 apps/api/        FastAPI backend (Phase 1, in progress) and scheduled worker
-apps/web/        Next.js web app (Phase 2)
+apps/web/        Next.js web app (Phase 2, in progress)
 apps/mobile/     React Native app (Phase 5)
 docs/            Architecture and design notes
 ```
@@ -33,13 +40,13 @@ sailprep brief --venue "Newport" --boat j70 --date 2026-07-18 --start 11:00 --en
 
 Sample output: [`packages/core/examples/newport-j70.md`](packages/core/examples/newport-j70.md).
 
-## Run the API
+## Run it
 
 ```bash
 docker compose up --build
 ```
 
-Then open http://localhost:8000/docs. See [apps/api/README.md](apps/api/README.md).
+Then open http://localhost:3000 for the web app, or http://localhost:8000/docs for the API. See [apps/web](apps/web/README.md) and [apps/api](apps/api/README.md).
 
 ## Architecture
 

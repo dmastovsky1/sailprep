@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --color-sea-50: #eef7fb;
+  --color-sea-100: #d6ecf5;
+  --color-sea-500: #1b84b3;
+  --color-sea-600: #156b93;
+  --color-sea-700: #115675;
+  --color-sea-900: #0b2f40;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+}
