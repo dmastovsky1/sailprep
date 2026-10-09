@@ -10,6 +10,8 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://sailprep:sailprep@localhost:5432/sailprep"
     environment: str = "development"
+    # Browser origins allowed to call the API (the web app).
+    cors_origins: list[str] = ["http://localhost:3000"]
 
 
 @lru_cache

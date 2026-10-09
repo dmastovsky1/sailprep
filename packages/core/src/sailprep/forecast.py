@@ -37,15 +37,22 @@ def http_get_json(url: str) -> JSON:
         return data
 
 
+def search_places(name: str, count: int = 5, fetch: Fetcher = http_get_json) -> list[Venue]:
+    """Places matching a name, best match first, via Open-Meteo's geocoder."""
+    url = f"{GEOCODE_URL}?{urllib.parse.urlencode({'name': name, 'count': count})}"
+    venues = []
+    for r in fetch(url).get("results") or []:
+        label = ", ".join(p for p in (r.get("name"), r.get("admin1"), r.get("country")) if p)
+        venues.append(Venue(label, r["latitude"], r["longitude"], r.get("timezone", "auto")))
+    return venues
+
+
 def geocode(name: str, fetch: Fetcher = http_get_json) -> Venue:
-    """Resolve a place name to a Venue using Open-Meteo's geocoder."""
-    url = f"{GEOCODE_URL}?{urllib.parse.urlencode({'name': name, 'count': 1})}"
-    results = fetch(url).get("results") or []
-    if not results:
+    """Resolve a place name to its best-matching Venue."""
+    matches = search_places(name, count=1, fetch=fetch)
+    if not matches:
         raise ValueError(f"Could not find a location named '{name}'")
-    r = results[0]
-    label = ", ".join(p for p in (r.get("name"), r.get("admin1"), r.get("country")) if p)
-    return Venue(label, r["latitude"], r["longitude"], r.get("timezone", "auto"))
+    return matches[0]
 
 
 def build_forecast_url(venue: Venue, day: date) -> str:
