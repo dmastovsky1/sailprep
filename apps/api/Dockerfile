@@ -1,5 +1,5 @@
 # Build from the repo root: docker build -f apps/api/Dockerfile .
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
